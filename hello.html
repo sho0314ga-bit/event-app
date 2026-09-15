@@ -28,7 +28,6 @@
 
 <script>
 
-console.log("JavaScript開始");
 
  let events = JSON.parse(localStorage.getItem("events")) || [];
 
@@ -356,7 +355,7 @@ html = "<p>イベント数："+count+"件</p>"+html;
 }
 document.getElementById("result").innerHTML = html;
 }
-console.log("events確認", events);
+
 displayEvents();
 
 </script>
