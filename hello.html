@@ -16,14 +16,15 @@
 <input id="dateInput" type="text" placeholder="開催日">
 <input id="lotteryDateInput" placeholder="当落日">
 <input id="searchInput" placeholder="イベントを検索" oninput="searchEvents()">
-<button id="favoriteButton" onclick="toggleFavoriteView()">お気に入りだけ表示</button>
+<button id="favoriteButton" onclick="toggleFavoriteView()">お気に入り</button>
 <button onclick="searchEvents()">検索</button>
 <button onclick="showEvent()">イベントを表示</button>
 <button id="sortEventsButton" onclick="sortEvents()">開催日順</button>
-<button onclick="showUpcomingEvents()">お気に入りの開催予定だけ表示</button>
-<button onclick="showPastEvents()">過去のイベントだけ表示</button>
-<button onclick="showTodayEvents()">本日開催だけ表示</button>
-<button onclick="showTomorrowEvents()">明日開催のイベントだけ表示</button>
+<button onclick="showUpcomingEvents()">お気に入りの開催予定イベント</button>
+<button onclick="showPastEvents()">過去のイベント</button>
+<button onclick="showTodayEvents()">本日開催のイベント</button>
+<button onclick="showTomorrowEvents()">明日開催のイベント</button>
+<button onclick="showWithinThreeDays()">3日以内のイベント</button>
 <p id="result"></p>
 
 <script>
@@ -344,7 +345,7 @@ function showTomorrowEvents(){
 
     if(isTomorrowEvent(event,today)){
     html += "<p>"+event.name+"</P>"+
-    "<p>"+event.venue+"</p>";
+    "<p>会場名："+event.venue+"</p>";
     count++;
     }
   }
@@ -355,6 +356,42 @@ html = "<p>イベント数："+count+"件</p>"+html;
 }
 document.getElementById("result").innerHTML = html;
 }
+
+function isWithinThreeDays(event,today){
+ const eventDate = new Date(event.date);
+ eventDate.setHours(0,0,0,0);
+ const ThreeDays = new Date(today);
+ ThreeDays.setDate(ThreeDays.getDate()+3);
+ return eventDate.getTime() >= today.getTime()&&
+        eventDate.getTime() <= ThreeDays.getTime(); 
+}
+
+function showWithinThreeDays(){
+  let html = "";
+  let count = 0;
+  const today = getToday();
+
+  for(let i=0; i< events.length;i++){
+    const event = events[i];
+
+    if(isWithinThreeDays(event,today)){
+    html += "<p>"+event.name+"</P>"+
+    "<p>会場名："+event.venue+"</p>"+
+    "<p>開催日："+event.date+"</p>";
+    count++;
+    }
+  }
+if(count === 0){
+  html = "<p>3日以内のイベントはありません</p>";
+}else{
+html = "<p>イベント数："+count+"件</p>"+html;
+}
+document.getElementById("result").innerHTML = html;
+}
+
+
+
+
 
 displayEvents();
 
