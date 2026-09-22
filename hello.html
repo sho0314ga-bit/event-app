@@ -2,11 +2,8 @@
 <html>
 <body>
 
-<h1>こんにちは、翔平です</h1>
+<h1>イベントアプリa版</h1>
 
-<h2>今日からエンジニアの勉強を始めます</h2>
-
-<p>Webアプリを作れるようになることが目標です。</p>
 
 
 <button onclick="alert('押されました！')">押してみる</button>
@@ -390,10 +387,24 @@ document.getElementById("result").innerHTML = html;
 }
 
 
-
-
-
 displayEvents();
+
+fetch("/events")
+  .then(response => response.json())
+  .then(data => {
+    let html =  "";
+
+    for(let i=0; i<data.length;i++){
+    html += "<p>"+data[i].name+"</p>"+
+    "<p>会場："+data[i].venue+"</p>";
+    }
+    document.getElementById("result").innerHTML = html;
+  
+  });
+
+
+
+
 
 </script>
 </body>

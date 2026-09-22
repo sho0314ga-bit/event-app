@@ -6,6 +6,7 @@ const app = express();
 const db = new Database("events.db");
 
 app.use(express.json());
+app.use(express.static(__dirname));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS events (
