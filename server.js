@@ -12,13 +12,16 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    venue TEXT NOT NULL
+    venue TEXT NOT NULL,
+    date TEXT NOT NULL,
+    lotteryDate TEXT,
+    favorite INTEGER NOT NULL DEFAULT 0
   )
 `);
 
 const insert = db.prepare(`
-  INSERT INTO events (name, venue)
-  VALUES (?, ?)
+  INSERT INTO events (name, venue,date,lotteryDate,favorite)
+  VALUES (?,?,?,?,?)
 `);
 
 const select = db.prepare(`
@@ -27,7 +30,7 @@ const select = db.prepare(`
 
 const update = db.prepare(`
   UPDATE events
-  SET name = ? , venue = ?
+  SET name = ? , venue = ? ,date = ? , lotteryDate = ? , favorite = ?
   WHERE id = ?
 `);
 
@@ -45,7 +48,7 @@ app.get("/events",(req,res)=>{
 app.post("/events",(req,res)=>{
     const newEvent = req.body;
 
-    insert.run(newEvent.name,newEvent.venue);
+    insert.run(newEvent.name,newEvent.venue,newEvent.date,newEvent.lotteryDate,newEvent.favorite);
     
     const rows = select.all();
     res.json(rows);
@@ -54,7 +57,7 @@ app.post("/events",(req,res)=>{
 app.patch("/events/:id",(req,res)=>{
   const newEvent = req.body;
 
-  update.run(newEvent.name,newEvent.venue,req.params.id);
+  update.run(newEvent.name,newEvent.venue,newEvent.date,newEvent.lotteryDate,newEvent.favorite,req.params.id);
 
   const rows = select.all();
   res.json(rows);

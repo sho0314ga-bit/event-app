@@ -15,7 +15,7 @@
 <input id="searchInput" placeholder="イベントを検索" oninput="searchEvents()">
 <button id="favoriteButton" onclick="toggleFavoriteView()">お気に入り</button>
 <button onclick="searchEvents()">検索</button>
-<button onclick="showEvent()">イベントを表示</button>
+<button onclick="addEvent()">イベントを表示</button>
 <button id="sortEventsButton" onclick="sortEvents()">開催日順</button>
 <button onclick="showUpcomingEvents()">お気に入りの開催予定イベント</button>
 <button onclick="showPastEvents()">過去のイベント</button>
@@ -387,7 +387,17 @@ document.getElementById("result").innerHTML = html;
 }
 
 
-displayEvents();
+//displayEvents();
+
+
+
+
+
+loadEvents();
+
+
+
+function loadEvents(){
 
 fetch("/events")
   .then(response => response.json())
@@ -396,15 +406,105 @@ fetch("/events")
 
     for(let i=0; i<data.length;i++){
     html += "<p>"+data[i].name+"</p>"+
-    "<p>会場："+data[i].venue+"</p>";
+    "<p>会場："+data[i].venue+"</p>"+
+    "<p>開催日："+data[i].date+"</p>"+
+    "<p>当落日："+data[i].lotteryDate+"</p>"+
+    "<p>お気に入り："+data[i].favorite+"</p>"+
+    "<button onclick=\"deleteEventFromDB("+data[i].id+")\">削除</button>"+
+    "<button onclick=\"editEventFromDB("+data[i].id+")\">編集</button>";
+
+
+
+
     }
     document.getElementById("result").innerHTML = html;
   
   });
+}
+
+function addEvent(){
+
+ console.log("addEventが実行された");
+
+const newEvent = {
+  name: document.getElementById("eventInput").value,
+  venue:document.getElementById("venueInput").value,
+  date:document.getElementById("dateInput").value,
+  lotteryDate:document.getElementById("lotteryDateInput").value,
+  favorite:0
+};
+
+fetch("/events",{
+  method: "POST",
+  headers:{
+    "Content-Type":"application/json"
+  },
+  body:JSON.stringify(newEvent)
+})
+.then(response => response.json())
+.then(data =>{
+  console.log(data);
+
+  loadEvents();
+});
+}
+
+function deleteEventFromDB(id){
+  fetch("/events/"+id,{
+    method:"DELETE"
+  })
+  .then (response => response.json())
+  .then(data =>{
+    loadEvents();
+  })
+}
 
 
 
+function editEventFromDB(id) {
 
+  fetch("/events")
+  .then(response => response.json())
+  .then(data => {
+
+    for (let i = 0; i < data.length; i++) {
+
+      if (data[i].id === id) {
+
+        const event = data[i];
+
+        const newName = prompt("イベント名を入力してください", event.name);
+        const newVenue = prompt("会場を入力してください", event.venue);
+        const newDate = prompt("開催日を入力してください", event.date);
+        const newLotteryDate = prompt("当落日を入力してください", event.lotteryDate);
+
+        const updatedEvent = {
+          name: newName,
+          venue: newVenue,
+          date: newDate,
+          lotteryDate: newLotteryDate,
+          favorite: event.favorite
+        };
+
+        fetch("/events/" + id, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(updatedEvent)
+        })
+        .then(response => response.json())
+        .then(data => {
+          loadEvents();
+        });
+
+      }
+
+    }
+
+  });
+
+}
 
 </script>
 </body>
@@ -412,7 +512,6 @@ fetch("/events")
 
 
 
- 
-
+  
 
  
