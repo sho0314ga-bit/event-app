@@ -410,11 +410,9 @@ fetch("/events")
     "<p>開催日："+data[i].date+"</p>"+
     "<p>当落日："+data[i].lotteryDate+"</p>"+
     "<p>お気に入り："+data[i].favorite+"</p>"+
+    "<button onclick=\"toggleFavoriteFromDB("+data[i].id+")\">お気に入り</button>"+
     "<button onclick=\"deleteEventFromDB("+data[i].id+")\">削除</button>"+
     "<button onclick=\"editEventFromDB("+data[i].id+")\">編集</button>";
-
-
-
 
     }
     document.getElementById("result").innerHTML = html;
@@ -505,6 +503,47 @@ function editEventFromDB(id) {
   });
 
 }
+
+
+
+function toggleFavoriteFromDB(id){
+ fetch("/events")
+  .then(response => response.json())
+  .then(data => {
+    for(let i=0; i<data.length;i++){
+      if(data[i].id === id){
+       const event = data[i];
+       const newFavorite = event.favorite === 0 ? 1:0
+        
+       const updatedEvent = {
+         name:event.name,
+         venue:event.venue,
+         date:event.date,
+         lotteryDate:event.lotteryDate,
+         favorite:newFavorite
+        };
+       
+       fetch("/events/"+id,{
+         method:"PATCH",
+         headers:{
+           "content-Type" : "application/json"
+          },
+         body:JSON.stringify(updatedEvent)
+        })
+       .then(response => response.json())
+       .then(data => {
+         loadEvents();
+        });
+      }
+    }
+  });
+}
+
+
+
+
+
+
 
 </script>
 </body>
