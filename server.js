@@ -6,7 +6,7 @@ const app = express();
 const db = new Database("events.db");
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static("public"));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS events (
@@ -72,5 +72,7 @@ app.delete("/events/:id",(req,res)=>{
 });
 
 app.listen(3000,() => {
-    console.log("サーバーが起動しました");
+
+   console.log("サーバーが起動しました");
+   
 });
