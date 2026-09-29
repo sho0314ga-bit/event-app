@@ -29,7 +29,7 @@
 
  let events = JSON.parse(localStorage.getItem("events")) || [];
 
- function showEvent() {
+ /*function showEvent() {
    const event = document.getElementById("eventInput").value;
    const venue = document.getElementById("venueInput").value;
    const date = document.getElementById("dateInput").value;
@@ -45,7 +45,7 @@
     });
     localStorage.setItem("events", JSON.stringify(events));
     displayEvents();
-  }
+  }*/
 
  function searchEvents() {
    const keyword = document.getElementById("searchInput").value;
@@ -424,7 +424,7 @@ function addEvent(){
   alert("イベント名・会場名・開催日を入力してください");
   return;
  }
-
+  
  const newEvent = {
     name: event,
     venue: venue,
@@ -433,6 +433,8 @@ function addEvent(){
     favorite: 0
   };
 
+ let requestOK;
+
   fetch("/events",{
    method: "POST",
    headers:{
@@ -440,9 +442,16 @@ function addEvent(){
     },
    body:JSON.stringify(newEvent)
   })
- .then(response => response.json())
+
+ .then (response =>{
+   requestOK = response.ok;
+   return response.json();
+  })
  .then(data =>{
-   console.log(data);
+   if(!requestOK){
+     alert(data.error);
+     return;
+    }
 
    loadEvents();
   });
@@ -487,15 +496,25 @@ function editEventFromDB(id) {
           favorite: event.favorite
         };
 
-        fetch("/events/" + id, {
+         let requestOK;
+        
+          fetch("/events/" + id, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(updatedEvent)
         })
-        .then(response => response.json())
+        .then(response => {
+          requestOK = response.ok;
+          return response.json()
+        })
         .then(data => {
+          if(!requestOK){
+           alert(data.error);
+           return;
+          }
+
           loadEvents();
         });
       }
