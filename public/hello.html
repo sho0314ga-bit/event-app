@@ -4,10 +4,6 @@
 
 <h1>イベントアプリa版</h1>
 
-
-
-<button onclick="alert('押されました！')">押してみる</button>
-
 <input id="eventInput" type="text" placeholder="イベント名">
 <input id="venueInput" type="text" placeholder="会場">
 <input id="dateInput" type="text" placeholder="開催日">
@@ -27,275 +23,108 @@
 <script>
 
 
- let events = JSON.parse(localStorage.getItem("events")) || [];
-
- /*function showEvent() {
-   const event = document.getElementById("eventInput").value;
-   const venue = document.getElementById("venueInput").value;
-   const date = document.getElementById("dateInput").value;
-   const lotteryDate = document.getElementById("lotteryDateInput").value;
 
 
-   events.push({
-     name: event,
-     venue: venue,
-     date: date,
-     lotteryDate: lotteryDate,
-     favorite: false
+function showTomorrowEvents(){
+  const today = getToday();
+
+  fetch("/events")
+  .then(response => response.json())
+  .then(data => {
+    const tomorrowEvents = data.filter(event=>{
+      return isTomorrowEvent(event,today)
     });
-    localStorage.setItem("events", JSON.stringify(events));
-    displayEvents();
-  }*/
-
- function searchEvents() {
-   const keyword = document.getElementById("searchInput").value;
-  
-   if (keyword === "") {
-     displayEvents();
+    if(tomorrowEvents.length === 0){
+     document.getElementById("result").innerHTML = 
+     "<p>明日開催のイベントはありません</p>";
      return;
     }
-  
-   let html = "";
-   let count = 0;
-
-   for (let i = 0; i < events.length; i++) {
-     const event = events[i];
-     if (
-       event.name.includes(keyword) ||
-       event.venue.includes(keyword) ||
-       event.date.includes(keyword) ||
-        event.lotteryDate.includes(keyword)
-      ) 
-       {
-          html += "<h2>" + (count + 1) + ". " + event.name + "</h2>";
-          html += "<p>会場：" + event.venue + "</p>";
-          html += "<p>開催日：" + event.date + "</p>";
-          html += "<p>当落日：" + event.lotteryDate + "</p>";
-          html += "<button onclick=\"toggleFavorite(" + i + ")\">" +(event.favorite ? "★ お気に入り済み" : "☆ お気に入り") +"</button>";
-          html += "<button onclick=\"editEvent(" + i + ")\">編集</button>";
-          html += "<button onclick=\"deleteEvent(" + i + ")\">削除</button>";
-          count++;
-        }
-  }
- if (count === 0) {
-   html = "<p>該当するイベントはありません</p>";
-  } else {
-    html = "<p>検索結果：" + count + "件</p>" + html;
-  }
-   console.log(html);
-   document.getElementById("result").innerHTML = html;
-}
-
-function showFavorites() {
-  let html = "";
-
-  for (let i = 0; i < events.length; i++) {
-    if (events[i].favorite === true) {
-     html +=
-     "<p>" +
-        events[i].name + "<br>" +
-        events[i].venue + "<br>" +
-        events[i].date + "<br>" +
-       "当落日：" + events[i].lotteryDate + "<br>" +
-       "<button onclick=\"editEvent(" + i + ")\">編集</button>" +
-       "<button onclick=\"deleteEvent(" + i + ")\">削除</button>" +
-       "<button onclick=\"toggleFavorite(" + i + ")\">★ お気に入り済み</button>" +
-       "</p>";
-    }
-  }
-
-  document.getElementById("result").innerHTML = html;
-  document.getElementById("favoriteButton").textContent = "すべて表示";
-}
-
-function toggleFavoriteView() {
-  const button = document.getElementById("favoriteButton");
-
-  if (button.textContent === "お気に入りだけ表示") {
-    showFavorites();
-  } else {
-    displayEvents();
-    button.textContent = "お気に入りだけ表示";
-  }
+    renderEvents(tomorrowEvents);
+  });  
 }
 
 
-
-function deleteEvent(index) {
- 
-  if (!confirm("本当に削除しますか？")) {
-  return;
-}
-
-  events.splice(index, 1);
-  localStorage.setItem("events", JSON.stringify(events));
-
-  console.log("削除後のイベント数：" + events.length);
-
-  searchEvents();
-
-
-}
-
-function toggleFavorite(index) {
-  events[index].favorite = !events[index].favorite;
-
-  localStorage.setItem("events", JSON.stringify(events));
-
-  displayEvents();
-}
 
 function showUpcomingEvents(){
-
- let html = "";
- let count = 0;
  const today = getToday();
-
- for(let i = 0; i< events.length; i++){
- const event = events[i];
-
- if(!isPastEvent(event,today) &&
-  event.favorite === true
- ){
-  html+= "<p>"+ event.name +"</p>"+
-  "<p>会場："+ event.venue +"</p>"+
-  "<p>開催日："+ event.date +"</p>"+
-  "<p> ★お気に入り </p>";
-
-  count++;
- }
+ 
+ fetch("/events")
+ .then(response => response.json())
+ .then(data => {
+   const upcomingEvents = data.filter(event => {
+     return (!isPastEvent(event,today) &&
+       event.favorite === 1
+      )
+   });
+   if(upcomingEvents.length === 0){
+     document.getElementById("result").innerHTML = 
+     "<p> お気に入りの開催予定のイベントはありません </p>"
+     return;
+    }
+   renderEvents(upcomingEvents);
+  });
 }
-  if(count === 0){
-    html = "<p> お気に入りの開催予定のイベントはありません </p>"
- } else {
- html = "<p>お気に入りの開催予定イベント："+ count +"件</p>" + html;
- }
- document.getElementById("result").innerHTML =html;
 
- }
+
+
+ function showWithinThreeDays(){
+  const today = getToday();
+
+  fetch ("/events")
+  .then(response => response.json())
+  .then(data => {
+   const WithinThreeDaysEvents = data.filter(event => {
+     return isWithinThreeDays(event,today);
+    });
+   if(WithinThreeDaysEvents.length === 0){
+     document.getElementById("result").innerHTML =
+     "<p>3日以内のイベントはありません</p>";
+     return;
+    }
+    renderEvents(WithinThreeDaysEvents);
+  });
+}
 
 
 
 function showPastEvents(){
-  let html = ""
-  let count = 0
-  const today = getToday();
-
-  for (let i = 0; i < events.length; i++){
-   const event = events[i];
-
-    if(isPastEvent(event,today)){
-      html +="<p>"+ event.name +"</p>"+
-             "<p>会場："+ event.venue +"</p>" +
-             "<p>開催日："+ event.date +"</p>";
-
-    count++;
+ const today = getToday();
+ fetch("/events")
+ .then(response => response.json())
+ .then(data =>{
+   const pastEvents = data.filter(event => {
+   return isPastEvent(event,today);
+   });
+   if (pastEvents.length === 0) {
+      document.getElementById("result").innerHTML =
+        "<p>過去のイベントはありません</p>";
+      return;
     }
-  }
-  if(count === 0){
-    html = "<p>過去のイベントはありません</p>";
-  }else{
-    html="<p>過去のイベント："+count+"件</p>" + html;
-  }
-
-document.getElementById("result").innerHTML=html;
+   renderEvents(pastEvents);
+  });
 }
+
+
 
 function showTodayEvents(){
-let html= "";
-let count= 0;
-const today = getToday();
-
-for (let i = 0; i<events.length;i++){
-  const event = events[i];
-
-  if (isTodayEvent(event,today)){
-
-    html += "<p>"+event.name+"</p>" +
-    "<p>"+event.venue+"</p>"+
-    "<p>"+event.date+"</p>";
-    count++
-  }
-}
-  if(count === 0){
-    html = "<p>本日開催のイベントはありません</p>";
-  }else{
-    html = "<p>本日の開催イベント："+count+"件</p>"+html;
-  }
-document.getElementById("result").innerHTML=html;
+ const today = getToday();
+ 
+ fetch("/events")
+ .then(response => response.json())
+ .then(data =>{
+   const todayEvents = data.filter(event =>{
+     return isTodayEvent(event,today);
+    });
+    if (todayEvents.length === 0) {
+     document.getElementById("result").innerHTML =
+     "<p>本日のイベントはありません</p>";
+      return;
+    }
+    renderEvents(todayEvents);
+  });
 }
 
 
-
-function editEvent(index) {
-console.log("editEventが実行されました");
-  const event = events[index];
-
-  const newName = prompt("イベント名を入力してください", event.name);
-  const newVenue = prompt("会場を入力してください", event.venue);
-  const newDate = prompt("開催日を入力してください", event.date);
-  const newlotteryDate = prompt("当落日を入力してください", event.lotteryDate);
-  
-
-  if (newName !== null && newVenue !== null && newDate !== null && newlotteryDate !== null) {
-    event.name  = newName
-    event.venue = newVenue
-    event.date  = newDate
-    event.lotteryDate = newlotteryDate
-
-    localStorage.setItem("events", JSON.stringify(events));
-
-    displayEvents();
-  }
-}
-
- function sortEvents(){
-   events.sort((a, b) => {
-  return new Date(a.date) - new Date(b.date);
-})
-
-  displayEvents();
-}
-
-
-function displayEvents() {
-  let html = "";
-
-  for (let i = 0; i < events.length; i++) {
-  const event = events[i];
-
-  const eventDate = new Date(event.date);
-  const today = new Date();
-
-  eventDate.setHours(0,0,0,0);
-  today.setHours(0,0,0,0);
-
-  let status = "";
-
-  if(eventDate<today){
-    status = "開催済み";
-  }else
-  if(eventDate.getTime() === today.getTime()){
-    status = "本日開催";
-  }else{
-    status = "開催予定";
-  }
-  
-    html +=
-  "<p>番号：" + i + "</p>" +
-      "<h2>" + event.name + "</h2>" +
-      "<p>会場：" + event.venue + "</p>" +
-      "<p>開催日：" + event.date + "</p>" +
-      "<p>" + status + "</p>" +
-      "<p>当落日：" + event.lotteryDate + "</p>" +
-      "<button onclick=\"toggleFavorite(" + i + ")\">" +(events[i].favorite ? "★ お気に入り済み" : "☆ お気に入り") +"</button>" +
-      "<button onclick=\"editEvent(" + events.indexOf(event) + ")\">編集</button>" +
-      "<button onclick=\"deleteEvent(" + events.indexOf(event) + ")\">削除</button>" +
-      "<hr>";
-  }
-
-  document.getElementById("result").innerHTML = html;
-}
 
 function isPastEvent(event,today){
 const eventDate = new Date(event.date);
@@ -315,35 +144,12 @@ function isTodayEvent(event,today){
   return eventDate.getTime() === today.getTime();
 }
 
-
 function isTomorrowEvent(event,today){
   const eventDate = new Date(event.date);
   eventDate.setHours(0,0,0,0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate()+1);
   return eventDate.getTime() === tomorrow.getTime() ;
-}
-
-function showTomorrowEvents(){
-  let html = "";
-  let count = 0;
-  const today = getToday();
-
-  for(let i=0; i< events.length;i++){
-    const event = events[i];
-
-    if(isTomorrowEvent(event,today)){
-    html += "<p>"+event.name+"</P>"+
-    "<p>会場名："+event.venue+"</p>";
-    count++;
-    }
-  }
-if(count === 0){
-  html = "<p>明日開催のイベントはありません</p>";
-}else{
-html = "<p>イベント数："+count+"件</p>"+html;
-}
-document.getElementById("result").innerHTML = html;
 }
 
 function isWithinThreeDays(event,today){
@@ -355,31 +161,9 @@ function isWithinThreeDays(event,today){
         eventDate.getTime() <= ThreeDays.getTime(); 
 }
 
-function showWithinThreeDays(){
-  let html = "";
-  let count = 0;
-  const today = getToday();
-
-  for(let i=0; i< events.length;i++){
-    const event = events[i];
-
-    if(isWithinThreeDays(event,today)){
-    html += "<p>"+event.name+"</P>"+
-    "<p>会場名："+event.venue+"</p>"+
-    "<p>開催日："+event.date+"</p>";
-    count++;
-    }
-  }
-if(count === 0){
-  html = "<p>3日以内のイベントはありません</p>";
-}else{
-html = "<p>イベント数："+count+"件</p>"+html;
-}
-document.getElementById("result").innerHTML = html;
-}
 
 
-//displayEvents();
+
 
 
 
@@ -393,22 +177,26 @@ function loadEvents(){
  fetch("/events")
   .then(response => response.json())
   .then(data => {
-    let html =  "";
-
-    for(let i=0; i<data.length;i++){
-    html += "<p>"+data[i].name+"</p>"+
-    "<p>会場："+data[i].venue+"</p>"+
-    "<p>開催日："+data[i].date+"</p>"+
-    "<p>当落日："+data[i].lotteryDate+"</p>"+
-    "<p>お気に入り："+data[i].favorite+"</p>"+
-    "<button onclick=\"toggleFavoriteFromDB("+data[i].id+")\">お気に入り</button>"+
-    "<button onclick=\"deleteEventFromDB("+data[i].id+")\">削除</button>"+
-    "<button onclick=\"editEventFromDB("+data[i].id+")\">編集</button>";
-
-    }
-    document.getElementById("result").innerHTML = html;
-  
+  renderEvents(data);
   });
+}
+
+
+
+function renderEvents(data){
+  let html =  "";
+  for(let i=0; i<data.length;i++){
+   const event = data[i];
+    
+   html += "<p>"+event.name+"</p>"+
+    "<p>会場："+event.venue+"</p>"+
+    "<p>開催日："+event.date+"</p>"+
+    "<p>当落日："+event.lotteryDate+"</p>"+
+    "<button onclick=\"toggleFavoriteFromDB("+event.id+")\">"+(event.favorite ? "★お気に入り済み" : "☆お気に入り")+"</button>"+
+    "<button onclick=\"deleteEventFromDB("+event.id+")\">削除</button>"+
+    "<button onclick=\"editEventFromDB("+event.id+")\">編集</button>";
+  }
+ document.getElementById("result").innerHTML = html;
 }
 
 
@@ -559,7 +347,71 @@ function toggleFavoriteFromDB(id){
 
 
 
+function searchEvents() {
+  const keyword = document.getElementById("searchInput").value;
+  
+ if (keyword === "") {
+   loadEvents();
+   return;
+ }
+  fetch("/events")
+  .then(response => response.json())
+  .then(data =>{
+   const searchResults = data.filter(event => {
+      return(
+       event.name.includes(keyword) ||
+       event.venue.includes(keyword) ||
+       event.date.includes(keyword) ||
+       event.lotteryDate.includes(keyword)
+      ) 
+    });
+   if (searchResults.length === 0) {
+     document.getElementById("result").innerHTML = "<p>該当するイベントはありません</p>";
+     return;
+    }
+    renderEvents(searchResults); 
+  });
+}
 
+
+
+function showFavorites() {
+ fetch ("/events")
+ .then(response => response.json())
+ .then(data =>{ 
+    const favoriteEvents = data.filter(event => {
+      return event.favorite ===1;
+    });
+    renderEvents(favoriteEvents);
+   document.getElementById("favoriteButton").textContent = "すべて表示";
+  });
+}
+
+
+
+function toggleFavoriteView() {
+  const button = document.getElementById("favoriteButton");
+
+  if (button.textContent === "お気に入りだけ表示") {
+    showFavorites();
+  } else {
+    loadEvents();
+    button.textContent = "お気に入りだけ表示";
+  }
+}
+
+
+
+function sortEvents(){
+ fetch("/events")
+ .then(response => response.json())
+ .then(data =>{
+   data.sort((a, b) => {
+     return new Date(a.date) - new Date(b.date);
+   })
+   renderEvents(data);
+  });
+}
 
 
 
