@@ -83,8 +83,8 @@ app.delete("/events/:id",(req,res)=>{
   res.json(rows);
 });
 
-app.listen(3000,() => {
+const PORT = process.env.PORT || 3000;
+app.listen(PORT ,() => { 
 
-   console.log("サーバーが起動しました");
-   
+ console.log("サーバーが起動しました");
 });
