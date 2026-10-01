@@ -3,7 +3,11 @@ const Database = require("better-sqlite3");
 
 
 const app = express();
-const db = new Database("events.db");
+const dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
+  ? process.env.RAILWAY_VOLUME_MOUNT_PATH + "/events.db"
+  : "events.db";
+
+const db = new Database(dbPath);
 
 app.use(express.json());
 app.use(express.static("public"));
