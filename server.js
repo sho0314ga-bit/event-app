@@ -50,30 +50,44 @@ app.get("/events",(req,res)=>{
 });
 
 app.post("/events",(req,res)=>{
-    const newEvent = req.body;
+ const newEvent = req.body;
 
-    if(!newEvent ||newEvent.name === ""|| newEvent.venue ===""||newEvent.date ==="" ){
-      return res.status(400).json({
-        error:"イベント名・会場名・開催日は必須です"
-      });
-    }
-
-    insert.run(newEvent.name,newEvent.venue,newEvent.date,newEvent.lotteryDate,newEvent.favorite);
-    
-    const rows = select.all();
-    res.json(rows);
+  if(
+   !newEvent ||
+   !newEvent.name ||
+   !newEvent.venue ||
+   !newEvent.date ||
+   newEvent.name.trim() === "" ||
+   newEvent.venue.trim() === "" ||
+   newEvent.date.trim() === ""
+  ){
+   return res.status(400).json({
+     error:"イベント名・会場名・開催日は必須です"
+    });
+  }
+ insert.run(newEvent.name.trim(),newEvent.venue.trim(),newEvent.date.trim(),(newEvent.lotteryDate || "").trim(),newEvent.favorite);
+ const rows = select.all();
+ res.json(rows);
 });
 
 app.patch("/events/:id",(req,res)=>{
   const newEvent = req.body;
 
-if(!newEvent ||newEvent.name === ""|| newEvent.venue ===""||newEvent.date ==="" ){
-      return res.status(400).json({
-        error:"イベント名・会場名・開催日は必須です"
-      });
-    }
+if(
+  !newEvent ||
+  !newEvent.name ||
+  !newEvent.venue ||
+  !newEvent.date ||
+  newEvent.name.trim() === "" ||
+  newEvent.venue.trim() === "" ||
+  newEvent.date.trim() === ""
+){
+  return res.status(400).json({
+    error:"イベント名・会場名・開催日は必須です"
+  });
+}
 
-  update.run(newEvent.name,newEvent.venue,newEvent.date,newEvent.lotteryDate,newEvent.favorite,req.params.id);
+  update.run(newEvent.name.trim(),newEvent.venue.trim(),newEvent.date.trim(),(newEvent.lotteryDate || "").trim(),newEvent.favorite,req.params.id);
 
   const rows = select.all();
   res.json(rows);

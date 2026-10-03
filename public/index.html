@@ -62,7 +62,6 @@
        margin: 5px 0;
       } 
     }
-    
   </style>
 </head>
 
@@ -307,7 +306,13 @@ function loadEvents(){
  fetch("/events")
   .then(response => response.json())
   .then(data => {
-  renderEvents(data);
+   renderEvents(data);
+  })
+  .catch(error => {
+    console.error(error);
+
+    document.getElementById("result").innerHTML=
+    "<p>データの取得に失敗しました</p>";
   });
 }
 
@@ -340,16 +345,16 @@ function addEvent(){
    const date = document.getElementById("dateInput").value;
    const lotteryDate = document.getElementById("lotteryDateInput").value;
 
- if(event === ""|| venue === ""|| date === ""){
+ if(event.trim() === ""|| venue.trim() === ""|| date.trim() === ""){
   alert("イベント名・会場名・開催日を入力してください");
   return;
  }
   
  const newEvent = {
-    name: event,
-    venue: venue,
-    date: date,
-    lotteryDate: lotteryDate,
+    name: event.trim(),
+    venue: venue.trim(),
+    date: date.trim(),
+    lotteryDate: lotteryDate.trim(),
     favorite: 0
   };
 
@@ -403,22 +408,49 @@ function editEventFromDB(id) {
 
         const event = data[i];
 
-        const newName = prompt("イベント名を入力してください", event.name);
-        const newVenue = prompt("会場を入力してください", event.venue);
-        const newDate = prompt("開催日を入力してください", event.date);
-        const newLotteryDate = prompt("当落日を入力してください", event.lotteryDate);
+       const newName = prompt("イベント名を入力してください", event.name);
+       if(newName === null){
+         return;
+        }
+       if(newName.trim() === ""){
+         alert("イベント名を入力してください");
+         return;
+        }
 
-        const updatedEvent = {
-          name: newName,
-          venue: newVenue,
-          date: newDate,
-          lotteryDate: newLotteryDate,
-          favorite: event.favorite
+       const newVenue = prompt("会場を入力してください", event.venue);
+       if(newVenue === null){
+         return;
+        }
+       if(newVenue.trim() === ""){
+         alert("会場を入力してください");
+         return;
+        }
+
+       const newDate = prompt("開催日を入力してください", event.date);
+       if(newDate === null){
+         return;
+        }
+       if(newDate.trim() === ""){
+         alert("開催日を入力してください");
+         return;
+        }
+
+       const newLotteryDate = prompt("当落日を入力してください", event.lotteryDate);
+       if(newLotteryDate === null){
+         return;
+        }
+
+       const updatedEvent = {
+         name: newName.trim(),
+         venue: newVenue.trim(),
+         date: newDate.trim(),
+         lotteryDate: newLotteryDate.trim(),
+         favorite: event.favorite
         };
-
-         let requestOK;
         
-          fetch("/events/" + id, {
+        let requestOK;
+        
+        fetch("/events/" + id, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json"
