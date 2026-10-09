@@ -319,23 +319,58 @@ function loadEvents(){
 
 
 function renderEvents(data){
-  let html =  "";
-  for(let i=0; i<data.length;i++){
-   const event = data[i];
-    
-   html += "<div class=\"event-card\">"+
-    "<h3>"+event.name+"</h3>"+
-    "<p>会場："+event.venue+"</p>"+
-    "<p>開催日："+event.date+"</p>"+
-    "<p>当落日："+event.lotteryDate+"</p>"+
-    "<button onclick=\"toggleFavoriteFromDB("+event.id+")\">"+(event.favorite ? "★お気に入り済み" : "☆お気に入り")+"</button>"+
-    "<button onclick=\"deleteEventFromDB("+event.id+")\">削除</button>"+
-    "<button onclick=\"editEventFromDB("+event.id+")\">編集</button>"+
-    "</div>";
-  }
- document.getElementById("result").innerHTML = html;
-}
+  const result = document.getElementById("result");
+  result.innerHTML = "";
 
+  for(let i = 0;i<data.length;i++){
+    const event = data[i];
+
+    const card = document.createElement("div")
+    card.className = "event-card";
+
+    const title = document.createElement("h3");
+    title.textContent = event.name;
+    card.appendChild(title);
+  
+    const venue = document.createElement("p");
+    venue.textContent = "会場："+event.venue;
+    card.appendChild(venue);
+    
+    const date = document.createElement("p");
+    date.textContent = "開催日：" + event.date;
+    card.appendChild(date);
+
+    const lotteryDate = document.createElement("p");
+    lotteryDate.textContent = "当落日：" + event.lotteryDate;
+    card.appendChild(lotteryDate);
+    
+    const toggleFavoriteButton = document.createElement("button");
+   toggleFavoriteButton.textContent = (event.favorite ? "★お気に入り済み" : "☆お気に入り");
+   toggleFavoriteButton.onclick = function(){
+     toggleFavoriteFromDB(event.id);
+    };
+   card.appendChild(toggleFavoriteButton);
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "編集";
+    editButton.onclick = function() {
+     editEventFromDB(event.id);
+    };
+    card.appendChild(editButton);
+
+   const deleteButton = document.createElement("button");
+   deleteButton.textContent = "削除";
+   deleteButton.onclick = function(){
+     deleteEventFromDB(event.id);
+    };
+   card.appendChild(deleteButton);
+
+    result.appendChild(card);
+  }
+}  
+  
+  
+ 
 
 
 function addEvent(){
