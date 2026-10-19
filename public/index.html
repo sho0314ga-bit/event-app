@@ -107,7 +107,33 @@
      max-width: 100%;
     }
 
+    .event-form-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .event-form-field {
+      min-width: 0;
+    }
+
+    .event-form-field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .event-form-field input {
+      width: 100%;
+      margin: 0;
+    }
+
     @media (max-width: 600px) {
+     .event-form-fields {
+       grid-template-columns: 1fr;
+      }
+
      .event-card {
        padding: 18px;
       }
@@ -132,15 +158,29 @@
 <!-- イベント追加 -->
 <h2>イベントを追加</h2>
 
-<div>
-  <input id="eventInput" type="text" placeholder="イベント名">
-  <input id="venueInput" type="text" placeholder="会場">
-  <input id="dateInput" type="date">
-  <input id="lotteryDateInput" type="date">
+<form onsubmit="submitEventForm(event)" novalidate>
+  <div class="event-form-fields">
+    <div class="event-form-field">
+      <label for="eventInput">イベント名（必須）</label>
+      <input id="eventInput" type="text" placeholder="イベント名">
+    </div>
+    <div class="event-form-field">
+      <label for="venueInput">会場（必須）</label>
+      <input id="venueInput" type="text" placeholder="会場">
+    </div>
+    <div class="event-form-field">
+      <label for="dateInput">開催日（必須）</label>
+      <input id="dateInput" type="date">
+    </div>
+    <div class="event-form-field">
+      <label for="lotteryDateInput">当落日（任意）</label>
+      <input id="lotteryDateInput" type="date">
+    </div>
+  </div>
 
-  <button id="addEventButton" onclick="addEvent()">イベントを追加</button>
+  <button id="addEventButton" type="submit">イベントを追加</button>
   <p id="addEventMessage" role="status"></p>
-</div>
+</form>
 
 <hr>
 
@@ -436,6 +476,11 @@ function renderEvents(data){
   
  
 
+
+function submitEventForm(event){
+  event.preventDefault();
+  addEvent();
+}
 
 function addEvent(){
 
